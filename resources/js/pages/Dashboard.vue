@@ -153,7 +153,6 @@ const formatDate = (date: string) => {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   </div>
 </template>
