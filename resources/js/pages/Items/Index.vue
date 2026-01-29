@@ -1,149 +1,138 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import ItemTable from '@/Components/Inventory/ItemTable.vue';
-import type { Item } from '@/Types/inventory';
+import { ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useInventory } from '@/composables/useInventory';
+import StockBadge from '@/components/Inventory/StockBadge.vue';
 
-interface Props {
-  items: {
-    data: Item[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-  };
-  filters: {
-    search?: string;
-    unit_type?: string;
-  };
-}
+const emit = defineEmits<{
+  navigate: [page: string, itemId?: number];
+}>();
 
-const props = defineProps<Props>();
+const { filteredItems, searchItems, filterByUnit, clearFilters, items } = useInventory();
+const search = ref('');
+const unitType = ref('');
+const units = ['Kg', 'm', 'cm', 'No. of Units'] as const;
 
-const search = ref(props.filters.search || '');
-const unitType = ref(props.filters.unit_type || '');
-
-const performSearch = () => {
-  router.get(route('items.index'), {
-    search: search.value,
-    unit_type: unitType.value,
-  }, {
-    preserveState: true,
-    preserveScroll: true,
-  });
+const handleSearch = (query: string) => {
+  search.value = query;
+  searchItems(query);
 };
 
-const clearFilters = () => {
-  search.value = '';
-  unitType.value = '';
-  performSearch();
+const handleUnitFilter = (unit: string) => {
+  unitType.value = unit;
+  filterByUnit(unit);
 };
 
-const hasFilters = computed(() => search.value || unitType.value);
+const handleClearFilters = () => {
+};
 </script>
 
 <template>
-  <AppLayout>
-    <Head title="Inventory Items" />
+  <div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-6 flex justify-between items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900">Inventory Items</h2>
+          <p class="mt-1 text-sm text-gray-600">Manage your inventory items</p>
+        </div>
+        <div class="flex gap-3">
+          <Button @click="emit('navigate', 'items-create')">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Items
+          </Button>
+          <Button variant="outline" @click="emit('navigate', 'items-deduct')">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+            Deduct Items
+          </Button>
+        </div>
+      </div>
 
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex justify-between items-center">
+      <!-- Filters -->
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <Input
+              :value="search"
+              type="text"
+              placeholder="Search items by name..."
+              @input="handleSearch(($event.target as HTMLInputElement).value)"
+              @keyup.enter="handleSearch(search)"
+            />
+          </div>
           <div>
-            <h2 class="text-3xl font-bold text-gray-900">Inventory Items</h2>
-            <p class="mt-1 text-sm text-gray-600">Manage your inventory items</p>
-          </div>
-          <div class="flex gap-3">
-            <Link :href="route('items.create')">
-              <Button>
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Items
-              </Button>
-            </Link>
-            <Link href="/items/deduct">
-              <Button variant="outline">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                </svg>
-                Deduct Items
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="bg-white rounded-lg shadow p-4 mb-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2">
-              <Input
-                v-model="search"
-                type="text"
-                placeholder="Search items by name..."
-                @keyup.enter="performSearch"
-              />
-            </div>
-            <div>
-              <Select v-model="unitType" @update:model-value="performSearch">
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by unit type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Units</SelectItem>
-                  <SelectItem value="kg">Kilograms (kg)</SelectItem>
-                  <SelectItem value="m">Meters (m)</SelectItem>
-                  <SelectItem value="cm">Centimeters (cm)</SelectItem>
-                  <SelectItem value="units">Units</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div v-if="hasFilters" class="mt-3 flex items-center gap-2">
-            <span class="text-sm text-gray-600">Active filters:</span>
-            <Button size="sm" variant="outline" @click="clearFilters">Clear all</Button>
-          </div>
-        </div>
-
-        <!-- Items Table -->
-        <ItemTable :items="items.data" />
-
-        <!-- Pagination -->
-        <div v-if="items.last_page > 1" class="mt-6 flex justify-center">
-          <div class="flex gap-2">
-            <Button
-              v-for="page in items.last_page"
-              :key="page"
-              :variant="page === items.current_page ? 'default' : 'outline'"
-              size="sm"
-              @click="router.get(route('items.index', { page, search: search, unit_type: unitType }))"
+            <select
+              :value="unitType"
+              @change="handleUnitFilter(($event.target as HTMLSelectElement).value)"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
             >
-              {{ page }}
-            </Button>
+              <option value="">All Units</option>
+              <option value="Kg">Kilograms (Kg)</option>
+              <option value="m">Meters (m)</option>
+              <option value="cm">Centimeters (cm)</option>
+              <option value="No. of Units">Units</option>
+            </select>
           </div>
         </div>
+        <div v-if="search || unitType" class="mt-3 flex items-center gap-2">
+          <span class="text-sm text-gray-600">Active filters:</span>
+          <Button size="sm" variant="outline" @click="handleClearFilters">Clear all</Button>
+        </div>
+      </div>
 
-        <!-- Empty State -->
-        <div v-if="items.data.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-          </svg>
-          <h3 class="mt-2 text-lg font-medium text-gray-900">No items found</h3>
-          <p class="mt-1 text-sm text-gray-500">
-            {{ hasFilters ? 'Try adjusting your filters' : 'Get started by adding your first item' }}
-          </p>
-          <div class="mt-6">
-            <Link :href="route('items.create')">
-              <Button>Add Items</Button>
-            </Link>
-          </div>
+      <!-- Items Grid -->
+      <div v-if="filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card v-for="item in filteredItems" :key="item.id">
+          <CardHeader>
+            <div class="flex justify-between items-start">
+              <CardTitle class="text-lg">{{ item.name }}</CardTitle>
+              <StockBadge :quantity="item.quantity" :reorder-level="item.reorder_level" />
+            </div>
+            <p v-if="item.description" class="text-sm text-gray-600 mt-2">{{ item.description }}</p>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Current Stock:</span>
+              <span class="font-semibold">{{ item.quantity }} {{ item.unit_type }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Reorder Level:</span>
+              <span class="text-sm">{{ item.reorder_level }} {{ item.unit_type }}</span>
+            </div>
+            <div class="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                @click="emit('navigate', 'items-history', item.id)"
+                class="flex-1"
+              >
+                History
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="bg-white rounded-lg shadow p-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">No items found</h3>
+        <p class="mt-1 text-sm text-gray-500">
+          {{ (search || unitType) ? 'Try adjusting your filters' : 'Get started by adding your first item' }}
+        </p>
+        <div class="mt-6">
+          <Button @click="emit('navigate', 'items-create')">Add Items</Button>
         </div>
       </div>
     </div>
-  </AppLayout>
+  </div>
 </template>

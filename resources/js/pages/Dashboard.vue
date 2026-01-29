@@ -3,20 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import StockBadge from '@/components/Inventory/StockBadge.vue';
-import type { Item, Transaction } from '@/types/inventory';
+import { useInventory } from '@/composables/useInventory';
 
-interface Props {
-  stats: {
-    total_items: number;
-    low_stock_items: number;
-    out_of_stock_items: number;
-    total_transactions: number;
-  };
-  recentTransactions: Transaction[];
-  lowStockItems: Item[];
-}
+const emit = defineEmits<{
+  navigate: [page: string, itemId?: number];
+}>();
 
-const props = defineProps<Props>();
+const { stats, recentTransactions, lowStockItems, items } = useInventory();
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -26,6 +19,10 @@ const formatDate = (date: string) => {
     hour: '2-digit',
     minute: '2-digit',
   });
+};
+
+const getItemName = (itemId: number) => {
+  return items.value.find((i) => i.id === itemId)?.name || 'Unknown Item';
 };
 </script>
 
@@ -39,7 +36,7 @@ const formatDate = (date: string) => {
           <p class="mt-1 text-sm text-gray-600">Welcome back! Here's your inventory overview.</p>
         </div>
         <div class="flex gap-3">
-          <Button>
+          <Button @click="emit('navigate', 'items-create')">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -56,7 +53,7 @@ const formatDate = (date: string) => {
               <CardTitle class="text-3xl">{{ stats.total_items }}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p class="text-sm text-primary hover:underline cursor-pointer">
+              <p class="text-sm text-primary hover:underline cursor-pointer" @click="emit('navigate', 'items')">
                 View all items →
               </p>
             </CardContent>
@@ -106,15 +103,15 @@ const formatDate = (date: string) => {
                 <div
                   v-for="transaction in recentTransactions"
                   :key="transaction.id"
-                  class="flex items-center justify-between py-3 border-b last:border-0"
+                  class="flex items-center justify-between py-3 border-b last:border-0 cursor-pointer hover:bg-gray-50 px-2 -mx-2"
+                  @click="emit('navigate', 'items-history', transaction.item_id)"
                 >
                   <div class="flex-1">
-                    <p class="font-medium text-sm">{{ transaction.item?.name }}</p>
-                    <p class="text-xs text-gray-500">{{ transaction.user?.name }} • {{ formatDate(transaction.created_at) }}</p>
+                    <p class="font-medium text-sm">{{ getItemName(transaction.item_id) }}</p>
+                    <p class="text-xs text-gray-500">{{ formatDate(transaction.transaction_date) }}</p>
                   </div>
-                  <Badge :variant="transaction.transaction_type === 'addition' ? 'default' : 'destructive'">
-                    {{ transaction.transaction_type === 'addition' ? '+' : '-' }}{{ transaction.quantity }}
-                    {{ transaction.item?.unit_type }}
+                  <Badge :variant="transaction.transaction_type === 'add' ? 'default' : 'destructive'">
+                    {{ transaction.transaction_type === 'add' ? '+' : '-' }}{{ transaction.quantity }}
                   </Badge>
                 </div>
                 <div v-if="recentTransactions.length === 0" class="text-center py-8 text-gray-500">
@@ -135,16 +132,17 @@ const formatDate = (date: string) => {
                 <div
                   v-for="item in lowStockItems"
                   :key="item.id"
-                  class="flex items-center justify-between py-3 border-b last:border-0"
+                  class="flex items-center justify-between py-3 border-b last:border-0 cursor-pointer hover:bg-gray-50 px-2 -mx-2"
+                  @click="emit('navigate', 'items-history', item.id)"
                 >
                   <div class="flex-1">
                     <p class="font-medium text-sm">{{ item.name }}</p>
                     <p class="text-xs text-gray-500">
-                      Current: {{ item.current_quantity }} {{ item.unit_type }} 
-                      • Min: {{ item.minimum_quantity }} {{ item.unit_type }}
+                      Current: {{ item.quantity }} {{ item.unit_type }}
+                      • Min: {{ item.reorder_level }} {{ item.unit_type }}
                     </p>
                   </div>
-                  <StockBadge :status="item.stock_status" />
+                  <StockBadge :quantity="item.quantity" :reorder-level="item.reorder_level" />
                 </div>
                 <div v-if="lowStockItems.length === 0" class="text-center py-8 text-green-600">
                   ✓ All items are well stocked!
