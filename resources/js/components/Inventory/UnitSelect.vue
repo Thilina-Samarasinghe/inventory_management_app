@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
 interface Props {
   modelValue: string;
   id?: string;
@@ -19,17 +17,23 @@ const units = [
   { value: 'cm', label: 'Centimeters (cm)' },
   { value: 'No. of Units', label: 'Units' },
 ];
+
+const handleChange = (event: Event) => {
+  const value = (event.target as HTMLSelectElement).value;
+  emit('update:modelValue', value);
+};
 </script>
 
 <template>
-  <Select :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-    <SelectTrigger :id="id">
-      <SelectValue placeholder="Select unit type" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem v-for="unit in units" :key="unit.value" :value="unit.value">
-        {{ unit.label }}
-      </SelectItem>
-    </SelectContent>
-  </Select>
+  <select
+    :id="id"
+    :value="modelValue"
+    @change="handleChange"
+    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary bg-white"
+  >
+    <option value="">Select unit type</option>
+    <option v-for="unit in units" :key="unit.value" :value="unit.value">
+      {{ unit.label }}
+    </option>
+  </select>
 </template>

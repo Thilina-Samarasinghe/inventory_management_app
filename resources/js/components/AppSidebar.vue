@@ -11,12 +11,20 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
+const emit = defineEmits<{
+  navigate: [page: string];
+}>();
+
 const menuItems = [
-  { title: "Dashboard", url: "#", icon: "📊" },
-  { title: "All Items", url: "#", icon: "📦" },
-  { title: "Add Items", url: "#", icon: "➕" },
-  { title: "Deduct Items", url: "#", icon: "➖" },
+  { title: "Dashboard", page: "dashboard", icon: "📊" },
+  { title: "All Items", page: "items", icon: "📦" },
+  { title: "Add Items", page: "items-create", icon: "➕" },
+  { title: "Deduct Items", page: "items-deduct", icon: "➖" },
 ];
+
+const handleNavigate = (page: string) => {
+  emit('navigate', page);
+};
 </script>
 
 <template>
@@ -34,10 +42,13 @@ const menuItems = [
           <SidebarMenu>
             <SidebarMenuItem v-for="item in menuItems" :key="item.title">
               <SidebarMenuButton as-child>
-                <a :href="item.url">
+                <button
+                  @click="handleNavigate(item.page)"
+                  class="w-full text-left flex items-center gap-2"
+                >
                   <span>{{ item.icon }}</span>
                   <span>{{ item.title }}</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
