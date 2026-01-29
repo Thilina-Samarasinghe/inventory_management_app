@@ -2,7 +2,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -11,16 +10,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { usePage } from "@inertiajs/vue3";
-import NavUser from "@/components/NavUser.vue";
-
-const page = usePage();
 
 const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: "📊" },
-  { title: "All Items", url: "/items", icon: "📦" },
-  { title: "Add Items", url: "/items/create", icon: "➕" },
-  { title: "Deduct Items", url: "/items/deduct", icon: "➖" },
+  { title: "Dashboard", url: "#", icon: "📊" },
+  { title: "All Items", url: "#", icon: "📦" },
+  { title: "Add Items", url: "#", icon: "➕" },
+  { title: "Deduct Items", url: "#", icon: "➖" },
 ];
 </script>
 
@@ -49,10 +44,5 @@ const menuItems = [
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
-
-    <SidebarFooter>
-      <!-- ✅ Pass the authenticated user -->
-      <NavUser :user="page.props.auth.user" />
-    </SidebarFooter>
   </Sidebar>
 </template>

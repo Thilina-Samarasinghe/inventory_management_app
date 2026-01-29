@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
-import StockBadge from '@/Components/Inventory/StockBadge.vue';
-import type { Item, Transaction } from '@/Types/inventory';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import StockBadge from '@/components/Inventory/StockBadge.vue';
+import type { Item, Transaction } from '@/types/inventory';
 
 interface Props {
   stats: {
@@ -32,28 +30,23 @@ const formatDate = (date: string) => {
 </script>
 
 <template>
-  <AppLayout>
-    <Head title="Dashboard" />
-
-    <div class="py-12">
-      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-        <!-- Header -->
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-3xl font-bold text-gray-900">Inventory Dashboard</h2>
-            <p class="mt-1 text-sm text-gray-600">Welcome back! Here's your inventory overview.</p>
-          </div>
-          <div class="flex gap-3">
-            <Link :href="route('items.create')">
-              <Button>
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Items
-              </Button>
-            </Link>
-          </div>
+  <div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+      <!-- Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900">Inventory Dashboard</h2>
+          <p class="mt-1 text-sm text-gray-600">Welcome back! Here's your inventory overview.</p>
         </div>
+        <div class="flex gap-3">
+          <Button>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Items
+          </Button>
+        </div>
+      </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -63,9 +56,9 @@ const formatDate = (date: string) => {
               <CardTitle class="text-3xl">{{ stats.total_items }}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Link :href="route('items.index')" class="text-sm text-primary hover:underline">
+              <p class="text-sm text-primary hover:underline cursor-pointer">
                 View all items →
-              </Link>
+              </p>
             </CardContent>
           </Card>
 
@@ -162,5 +155,5 @@ const formatDate = (date: string) => {
         </div>
       </div>
     </div>
-  </AppLayout>
+  </div>
 </template>

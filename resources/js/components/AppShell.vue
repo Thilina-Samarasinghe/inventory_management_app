@@ -1,22 +1,34 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import type { AppShellVariant } from '@/types';
+import AppSidebar from '@/components/AppSidebar.vue';
+import AppHeader from '@/components/AppHeader.vue';
+import Dashboard from '@/pages/Dashboard.vue';
 
-type Props = {
-    variant?: AppShellVariant;
+const currentPage = ref('dashboard');
+const sidebarOpen = ref(true);
+
+// Mock data for now
+const dashboardProps = {
+  stats: {
+    total_items: 45,
+    low_stock_items: 8,
+    out_of_stock_items: 2,
+    total_transactions: 156,
+  },
+  recentTransactions: [],
+  lowStockItems: [],
 };
-
-defineProps<Props>();
-
-const isOpen = usePage().props.sidebarOpen;
 </script>
 
 <template>
-    <div v-if="variant === 'header'" class="flex min-h-screen w-full flex-col">
-        <slot />
+  <SidebarProvider :default-open="sidebarOpen">
+    <AppSidebar />
+    <div class="flex min-h-screen w-full flex-col">
+      <AppHeader />
+      <main class="flex-1 overflow-y-auto">
+        <Dashboard v-if="currentPage === 'dashboard'" v-bind="dashboardProps" />
+      </main>
     </div>
-    <SidebarProvider v-else :default-open="isOpen">
-        <slot />
-    </SidebarProvider>
+  </SidebarProvider>
 </template>
