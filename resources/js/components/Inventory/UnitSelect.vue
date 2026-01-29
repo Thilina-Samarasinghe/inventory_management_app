@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Props {
   modelValue: string;
@@ -14,10 +14,10 @@ defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const units = [
-  { value: 'kg', label: 'Kilograms (kg)' },
+  { value: 'Kg', label: 'Kilograms (Kg)' },
   { value: 'm', label: 'Meters (m)' },
   { value: 'cm', label: 'Centimeters (cm)' },
-  { value: 'units', label: 'Units' },
+  { value: 'No. of Units', label: 'Units' },
 ];
 </script>
 

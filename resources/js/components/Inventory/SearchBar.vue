@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Input } from '@/Components/ui/input';
+import { Input } from '@/components/ui/input';
 import { useDebounceFn } from '@vueuse/core';
 
 interface Props {

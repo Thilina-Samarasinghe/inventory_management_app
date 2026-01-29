@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Input } from '@/Components/ui/input';
+import { Input } from '@/components/ui/input';
 
 interface Props {
   modelValue: number | null;
