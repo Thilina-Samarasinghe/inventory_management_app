@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Badge } from '@/Components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { computed } from 'vue';
 
 interface Props {
